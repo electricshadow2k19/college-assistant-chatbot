@@ -5,32 +5,28 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [file, setFile] = useState(null);
 
   const sendMessage = async () => {
-    if (!input.trim() && !file) return;
+    if (!input.trim()) return;
 
     const newMessages = [
       ...messages,
       {
         role: "user",
         content: input,
-        file: file?.name || null,
       },
     ];
     setMessages(newMessages);
     setInput("");
-    setFile(null);
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("message", input);
-      if (file) formData.append("file", file);
-
       const res = await fetch("/api/chat", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: input }),
       });
 
       const data = await res.json();
@@ -81,16 +77,11 @@ export default function Home() {
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`${styles.message} ${
-              msg.role === "user" ? styles.user : styles.assistant
-            }`}
+            className={`${styles.message} ${msg.role === "user" ? styles.user : styles.assistant}`}
           >
             <div>
               <strong>{msg.role === "user" ? "You" : "AI"}:</strong> {msg.content}
             </div>
-            {msg.file && (
-              <div className={styles.fileLine}>📎 File uploaded: {msg.file}</div>
-            )}
             <button
               className={styles.copyBtn}
               onClick={() => handleCopy(msg.content)}
@@ -109,11 +100,6 @@ export default function Home() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Type your message..."
-        />
-        <input
-          className={styles.fileInput}
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
         />
         <button className={styles.sendBtn} onClick={sendMessage}>
           Send
