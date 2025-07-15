@@ -9,7 +9,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemma-3n-e2b-it:free",
+        model: "cognitivecomputations/venice:free",
         messages: [
           {
             role: "system",
