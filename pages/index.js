@@ -1,12 +1,15 @@
 import React, { useState } from "react";
+import ChatBubble from "../components/ChatBubble";
+import "../public/styles.css";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !file) return;
 
     const newMessages = [...messages, { role: "user", content: input }];
     setMessages(newMessages);
@@ -35,26 +38,34 @@ export default function Home() {
     setLoading(false);
   };
 
+  const handleFileUpload = (e) => {
+    const uploaded = e.target.files[0];
+    setFile(uploaded);
+    setMessages([...messages, { role: "user", content: `📎 File uploaded: ${uploaded.name}` }]);
+  };
+
   return (
-    <div style={{ maxWidth: 800, margin: "2rem auto", padding: "1rem" }}>
+    <div className="container">
       <h1>Hi, I'm your college assistant!</h1>
       <p>I can help with assignments, reminders, APA formatting, and more.</p>
 
-      <div style={{ border: "1px solid #ccc", padding: 10, margin: "1rem 0", minHeight: 300 }}>
+      <div className="chat-box">
         {messages.map((msg, idx) => (
-          <p key={idx}><strong>{msg.role === "user" ? "You" : "AI"}:</strong> {msg.content}</p>
+          <ChatBubble key={idx} role={msg.role} content={msg.content} />
         ))}
-        {loading && <p><em>Loading...</em></p>}
+        {loading && <p><em>Thinking...</em></p>}
       </div>
 
-      <input
-        style={{ width: "80%", padding: 10 }}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        placeholder="Type your message..."
-      />
-      <button onClick={sendMessage} style={{ padding: 10, marginLeft: 5 }}>Send</button>
+      <div className="input-area">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Type your message..."
+        />
+        <input type="file" onChange={handleFileUpload} />
+        <button onClick={sendMessage}>Send</button>
+      </div>
     </div>
   );
 }
