@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ChatBubble from "../components/ChatBubble";
-import "../public/styles.css";
+
 
 export default function Home() {
   const [input, setInput] = useState("");
