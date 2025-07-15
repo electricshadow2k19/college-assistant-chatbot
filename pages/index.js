@@ -81,7 +81,7 @@ export default function Home() {
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={\`\${styles.message} \${msg.role === "user" ? styles.user : styles.assistant}\`}
+            className={`${styles.message} ${msg.role === "user" ? styles.user : styles.assistant}`}
           >
             <div>
               <strong>{msg.role === "user" ? "You" : "AI"}:</strong> {msg.content}
