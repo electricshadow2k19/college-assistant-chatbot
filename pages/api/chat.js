@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+        model: "deepseek-ai/deepseek-chat",
         messages: [
           {
             role: "system",
