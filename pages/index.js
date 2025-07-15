@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import ChatBubble from "../components/ChatBubble";
-
+import styles from "../styles/Home.module.css";
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -11,60 +10,112 @@ export default function Home() {
   const sendMessage = async () => {
     if (!input.trim() && !file) return;
 
-    const newMessages = [...messages, { role: "user", content: input }];
+    const newMessages = [
+      ...messages,
+      {
+        role: "user",
+        content: input,
+        file: file?.name || null,
+      },
+    ];
     setMessages(newMessages);
     setInput("");
+    setFile(null);
     setLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("message", input);
+      if (file) formData.append("file", file);
+
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input }),
+        body: formData,
       });
 
       const data = await res.json();
       if (res.ok) {
-        setMessages([...newMessages, { role: "assistant", content: data.result }]);
+        setMessages([
+          ...newMessages,
+          {
+            role: "assistant",
+            content: data.result,
+          },
+        ]);
       } else {
-        setMessages([...newMessages, { role: "assistant", content: "Error: " + data.error }]);
+        setMessages([
+          ...newMessages,
+          {
+            role: "assistant",
+            content: "Error: " + data.error,
+          },
+        ]);
       }
     } catch (error) {
-      setMessages([...newMessages, { role: "assistant", content: "Failed to connect to API." }]);
+      setMessages([
+        ...newMessages,
+        {
+          role: "assistant",
+          content: "Failed to connect to API.",
+        },
+      ]);
     }
 
     setLoading(false);
   };
 
-  const handleFileUpload = (e) => {
-    const uploaded = e.target.files[0];
-    setFile(uploaded);
-    setMessages([...messages, { role: "user", content: `📎 File uploaded: ${uploaded.name}` }]);
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert("Copied to clipboard!");
+    });
   };
 
   return (
-    <div className="container">
-      <h1>Hi, I'm your college assistant!</h1>
-      <p>I can help with assignments, reminders, APA formatting, and more.</p>
+    <div className={styles.container}>
+      <h1 className={styles.title}>Hi, I'm your college assistant!</h1>
+      <p className={styles.subtitle}>
+        I can help with assignments, reminders, APA formatting, and more.
+      </p>
 
-      <div className="chat-box">
+      <div className={styles.chatBox}>
         {messages.map((msg, idx) => (
-          <ChatBubble key={idx} role={msg.role} content={msg.content} />
+          <div
+            key={idx}
+            className={\`\${styles.message} \${msg.role === "user" ? styles.user : styles.assistant}\`}
+          >
+            <div>
+              <strong>{msg.role === "user" ? "You" : "AI"}:</strong> {msg.content}
+            </div>
+            {msg.file && (
+              <div className={styles.fileLine}>📎 File uploaded: {msg.file}</div>
+            )}
+            <button
+              className={styles.copyBtn}
+              onClick={() => handleCopy(msg.content)}
+            >
+              Copy
+            </button>
+          </div>
         ))}
-        {loading && <p><em>Thinking...</em></p>}
+        {loading && <div className={styles.loading}>Typing...</div>}
       </div>
 
-      <div className="input-area">
+      <div className={styles.inputRow}>
         <input
+          className={styles.textInput}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Type your message..."
         />
-        <input type="file" onChange={handleFileUpload} />
-        <button onClick={sendMessage}>Send</button>
+        <input
+          className={styles.fileInput}
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+        <button className={styles.sendBtn} onClick={sendMessage}>
+          Send
+        </button>
       </div>
     </div>
   );
