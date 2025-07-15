@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek-ai/deepseek-chat",
+        model: "tngtech/deepseek-r1t2-chimera:free",
         messages: [
           {
             role: "system",
